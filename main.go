@@ -4,6 +4,7 @@ package main
 import (
 	_ "embed"
 	"flag"
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -80,7 +81,23 @@ func main() {
 
 	// todo: ファイル名が重複していたら、エラーを出す
 	// todo: ファイルの出力先をXDG_CONFIG_HOME/go-memoにする
-	if err := t.Execute(os.Stdout, memo); err != nil {
+
+	// filenameを指定して、ファイルを作成する
+	filename_full := filepath.Join(c_dir, "memo", filename)
+
+	// memo dirを作成する
+	if _, err := os.Stat(filepath.Join(c_dir, "memo")); os.IsNotExist(err) {
+		os.MkdirAll(filepath.Join(c_dir, "memo"), 0755)
+	}
+
+	fmt.Println("filename_full: ", filename_full)
+	f, err := os.Create(filename_full)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer f.Close()
+
+	if err := t.Execute(f, memo); err != nil {
 		log.Fatal(err)
 	}
 
